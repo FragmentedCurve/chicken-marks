@@ -31,7 +31,7 @@
   (do-search url-snippet '()))
 
 (define (do-add url tagline)
-  (bookie-add (bookie-server) (cdr marsk-current-key) url tagline))
+  (bookie-add (bookie-server) (cdr marks-current-key) url tagline))
 
 (define (do-delete url)
   (bookie-delete (bookie-server) (cdr marks-current-key) url))

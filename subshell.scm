@@ -43,9 +43,11 @@
           ((in (car cmd) '("help" "?" "h")) (subshell-help))
           ; TODO: Finish implementing these.
           ((in (car cmd) '("add" "a"))
-            (map (lamda (entry))
+            (for-each (lambda (e) (do-add (cdr e) (caddr cmd)))
               (get-urls entries position (cadr cmd))))
-          ((in (car cmd) '("append" "aa")) (print "APPEND SOMETHING"))
+          ((in (car cmd) '("append" "aa"))
+            (for-each (lambda (e) (do-add (cdr e) (append (car e) (caddr cmd))))
+              (get-urls entries position (cadr cmd))))
           ((in (car cmd) '("delete" "d")) (print "DELETE SOMETHING"))
           ((in (car cmd) '("next" "n"))
             (if (< position (- (length entries) 10))
@@ -66,7 +68,12 @@
     (when (<= 2 (length user-input))
       (set-cdr! result (list (all-to-number (string->list (cadr user-input))))))
     (when (<= 3 (length user-input))
-      (set! result (append result (list (cddr user-input))))) ; TODO: Can I append without copying?
+      (set! result
+        (join
+          (list result (map
+              (lambda (k) (string-split k " "))
+              (cddr user-input))))))
+            
 
     (if (null? user-input) (subshell-prompt) result)))
 
