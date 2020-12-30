@@ -18,6 +18,9 @@
         (set! haystack (cdr haystack))
         (loop)))))
 
+(define (not-null? x)
+  (not (null? x)))
+  
 ;;
 ;; Help me!
 ;;
@@ -99,11 +102,11 @@
           (let ((first (car (cdr args))) (second (cdr (cdr args))))
             (if (= 0 (length second))
               (abort (make-composite-condition (make-property-condition 'exn) (make-property-condition 'args)))) 
-            (action (car (cdr args)) (cdr (cdr args)))))
+            (action (car (cdr args)) (apply string->tagline (cdr (cdr args))))))
         ((in action (list do-delete do-import do-ingest do-url-search) eq?)
           (action (car (cdr args))))
         ((in action (list do-tag-search))
-          (action (cdr args)))
+          (action (apply string->tagline (cdr args))))
         (else (action)))))
   (exit 0))
 

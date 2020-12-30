@@ -66,9 +66,44 @@
 ;; Parses bookie nn data. (Entries are separated by newline-line)
 ;; Returns a list of pairs where the pairs are (tagline . url)
 ;;
-(define (bookie-parse-nn s)
-  (do
-    ((data (string-split s "\n") (cddr data))
-      (result '()))
-    ((null? data) result)
-    (set! result (cons (cons (car data) (cadr data)) result))))
+(define (bookie-parse s)
+  (if (string? s)
+    (let loop ((data (string-split s "\n")))
+      (if (null? data) '()
+        `((,(string->tagline (car data)) . ,(cadr data)) . ,(loop (cddr data)))))
+    '()))
+
+;;
+;; Accepts a string.
+;; Returns a list of symbols.
+;;
+(define (string->tagline first . all)
+  (let ((s (cons first all)))
+    (map string->symbol
+      (join (map (lambda (s) (string-split s " ")) s)))))
+
+;;
+;; Accepts a list of symbols.
+;; Returns a string.
+;;
+(define (tagline->string tags)
+  (apply string-append (intersperse (map symbol->string tags) " ")))
+
+(define (string->entry tag-string url)
+  (cons (string->tagline tag-string) url))
+
+(define (entry->string e)
+  (string-append (tagline->string (entry-tagline e)) "\n" (entry-url e)))
+
+(define (entry-tagline e)
+  (car e))
+
+(define (entry-url e)
+  (cdr e))
+  
+(define (bookie-update-tagline entries tagline url)
+  (map (lambda (entry)
+      (if (eq=? url (cdr entry))
+          (cons tagline url)
+          entry))
+    entries))

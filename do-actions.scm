@@ -8,7 +8,7 @@
 (import (chicken string))
 
 (define (do-list-all)
-  (print-entry-list (bookie-parse-nn
+  (print-entry-list (bookie-parse
     (bookie-search (bookie-server) (cdr marks-current-key) "" ""))))
 
 (define (do-raw)
@@ -16,10 +16,11 @@
     (bookie-search (bookie-server) (cdr marks-current-key) "" ""))))
 
 (define (do-search url tag-list)
-  (let ((entries (bookie-parse-nn
-    (bookie-search (bookie-server) (cdr marks-current-key)
-      url
-      (apply string-append (map ->string (intersperse tag-list" ")))))))
+  (let ((entries (bookie-parse
+      (bookie-search (bookie-server) (cdr marks-current-key)
+        url
+        (tagline->string tag-list)))))
+
     (if (= 1 (length entries))
       (print-entry (car entries))
       (marks-subshell entries))))
@@ -31,10 +32,10 @@
   (do-search url-snippet '()))
 
 (define (do-add url tagline)
-  (bookie-add (bookie-server) (cdr marks-current-key) url tagline))
+  (bookie-add (bookie-server) (cdr marks-current-key) url (tagline->string tagline)))
 
 (define (do-delete url)
-  (bookie-delete (bookie-server) (cdr marks-current-key) url))
+  (bookie-delete (bookie-server) (cdr marks-current-key) url ""))
 
 (define (do-kill)
   (bookie-kill (bookie-server) (cdr marks-current-key)))
@@ -45,30 +46,13 @@
 (define (do-ingest filename)
   (print filename))
 
-;;
-;; Typical display of a bookie entry in marks.
-;;
-(define (print-entry entry)
-  ; TODO: Make a nice way of handling color. Also, don't let the user input plain ANSI codes.
-  ;       Let them type in "green" etc. in their settings file.
-  (print
-    "\x1b[" ; ANSI terminal escape
-    (marks-setting 'tagline-background) ";"
-    (marks-setting 'tagline-foreground) "m"
-    "TAGS : " (car entry) "\x1b[0m")
-  (print
-    "\x1b[" ; ANSI terminal escape
-    (marks-setting 'urlline-background) ";"
-    (marks-setting 'urlline-foreground) "m"
-    "URL  : " (cdr entry) "\x1b[0m"))
-
-;;
-;; Print out a list of bookie entries to the console.
-;;
+(define (print-entry e)
+  (print "TAGS : " (tagline->string (entry-tagline e)))
+  (print "URL  : " (entry-url e)))
+  
 (define (print-entry-list data)
-  (let loop ((sep "") (d data))
-    (if (< 0 (length d))
-      (begin
-        (display sep)
-        (print-entry (car d))
-        (loop "\n" (cdr d))))))
+  (let loop ((walk data))
+    (when (not (null? walk))
+      (print-entry (car walk))
+      (when (not (null? (cdr walk))) (print)) ; avoid print an extra newline at the end
+      (loop (cdr walk)))))
