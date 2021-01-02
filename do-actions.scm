@@ -34,6 +34,16 @@
 (define (do-add url tagline)
   (bookie-add (bookie-server) (cdr marks-current-key) url (tagline->string tagline)))
 
+(define (do-append url tagline)
+  (let ([entry (bookie-parse (bookie-search (bookie-server) (cdr marks-current-key)  url ""))])
+    (cond
+      ([null? entry]
+        (print "Error -- Failed to find an entry with URL: " url))
+      ([> (length entry) 1]
+        (print "Error -- Too many entries found with URL: " url))
+      (else
+        (do-add url (append (entry-tagline (car entry)) tagline))))))
+  
 (define (do-delete url)
   (bookie-delete (bookie-server) (cdr marks-current-key) url ""))
 
