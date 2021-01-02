@@ -44,6 +44,9 @@
       (if (string=? (entry-url e) (entry-url (car temp)))
         (cdr temp)
         (cons (car temp) (loop (cdr temp))))))
+
+  ; Print the first window before prompting
+  (print-window entries 0)
   
   (let loop ((cmd (subshell-prompt)) (position 0))
     (when (not (in (subshell-cmd-action cmd) '("quit" "q")))
@@ -75,16 +78,16 @@
             (get-urls entries position (subshell-cmd-nums cmd))))
 
         ; Go to next window
-        ((in (subshell-cmd-action cmd) '("next" "n"))
+        ((in (subshell-cmd-action cmd) '("next" "]"))
           (when (< position (- (length entries) 10))
             (set! position (+ position 10))
             (print-window entries position)))
 
         ; Go to previous window
-        ((in (subshell-cmd-action cmd) '("prev" "nn"))
+        ((in (subshell-cmd-action cmd) '("prev" "["))
           (when (<= 0 (- position 10)) 
-            (set! position (- position 10)))
-            (print-window entries position))
+            (set! position (- position 10))
+            (print-window entries position)))
 
         ; Display current window
         ((in (subshell-cmd-action cmd) '("print" "p")) (print-window entries position))
@@ -122,10 +125,10 @@
 (define (subshell-cmd-tagline cmd)
   (vector-ref cmd 2))
 
-(define (subshell-nums->urls entries position numlist)
-    (let loop ((result '()) (nums numlist))
-      (if (null? nums) result
-          (loop (cons (list-ref entries (+ position (car nums))) result) (cdr nums)))))
+;(define (subshell-nums->urls entries position numlist)
+;    (let loop ((result '()) (nums numlist))
+;      (if (null? nums) result
+;          (loop (cons (list-ref entries (+ position (car nums))) result) (cdr nums)))))
 
 (define (subshell-help)
   (print "===============================================\n"
@@ -133,8 +136,8 @@
          "append (aa)  [0-9]... [tags]   Append tags\n"
          "delete (d)   [0-9]...          Delete entries\n\n"
          
-         "next   (n)\n"
-         "prev   (nn)\n"
+         "next   (])\n"
+         "prev   ([)\n"
          "print  (p)\n\n"
          
          "quit   (q)                     Quit\n"
