@@ -56,13 +56,14 @@
 (define (do-ingest filename)
   (print filename))
 
-(define (print-entry e)
-  (print "TAGS : " (tagline->string (entry-tagline e)))
-  (print "URL  : " (entry-url e)))
+(define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix ""))
+  (display prefix)
+  (print line-prefix "TAGS : " (tagline->string (entry-tagline e)) line-suffix)
+  (print line-prefix "URL  : " (entry-url e) line-suffix)
+  (display suffix))
   
 (define (print-entry-list data)
-  (let loop ((walk data))
+  (let loop ([walk data] [sep ""])
     (when (not (null? walk))
-      (print-entry (car walk))
-      (when (not (null? (cdr walk))) (print)) ; avoid print an extra newline at the end
-      (loop (cdr walk)))))
+      (print-entry (car walk) prefix: sep)
+      (loop (cdr walk) "\n"))))

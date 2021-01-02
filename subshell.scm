@@ -1,101 +1,140 @@
 (declare (unit subshell))
 (declare (uses bookie))
+(declare (uses utils))
 
+(import srfi-1)
 (import linenoise)
 (import (chicken string))
 (import (chicken io))
+(import (chicken format))
 
-; TODO: Make a collection of window- functions that each with the a vector of this form #(entry-list position window-size)
+;;
+;; Returns a vector of the form: #(entry-list position window-size)
+;;
+(define (window l #!key (position 0) (size 10))
+  (vector l position size ))
 
-(define (window-count l)
-  (ceiling (/ (length l) 10)))
+(define (window-abs w i)
+  (+ i (* (window-size w) (window-position w))))
+
+(define (window-count w)
+  (ceiling (/ (window-length w) (window-size w))))
+
+(define (window-size w)
+  (vector-ref w 2))
+
+(define (window-set-size! w size)
+  (vector-set! w 2 size))
+
+(define (window-next! w)
+  (when (< [window-position w] [- (window-count w) 1])
+    (vector-set! w 1 (add1 (window-position w)))))
+
+(define (window-prev! w)
+  (when [> (window-position w) 0]
+    (vector-set! w 1 (- (window-position w) 1))))
+
+(define (window-position w)
+  (vector-ref w 1))
+
+(define (valid-window-index? w i)
+  (and
+    [>= i 0]
+    [< i (window-size w)]
+    [< (window-abs w i) (window-length w)]))
   
-(define (is-all-numeric? l)
-  (let loop ()
-    (if (char-numeric? (car l))
-      (begin
-        (set! l (cdr l))
-        (loop))
-      #f))
-  #t)
+(define (window-set-position! w position)
+  (vector-set! w 1 position))
 
+(define (window-length w)
+  (length (vector-ref w 0)))
+
+(define (window-ref w i)
+  (list-ref (vector-ref w 0) (window-abs w i)))
+
+(define (window-for-each w f)  
+  (do
+    ([i 0 (add1 i)])
+    ([not (valid-window-index? w i)])
+    (f (window-ref w i) i)))
+
+(define (print-entry-window w)
+  (window-for-each w
+    (lambda (e i)
+      (print-entry e
+        suffix: "\n"
+        line-prefix: (sprintf "~A) " i)))))
+
+;;
+;; Ignore all non-numeric chars & convert chars to numbers.
+;;
 (define (all-to-number l)
-  (let loop ((walk l))
-    (set-car! walk (string->number (string (car walk))))
-    (if (null? (cdr walk)) l (loop (cdr walk)))))
+  (map (lambda (n) (char-digit->integer n))
+    (filter char-numeric? l)))
 
+;;
+;; Entry point for the marks subshell.
+;;
 (define (marks-subshell entries)
-  (define (print-window entries position)
-    (do
-      ((i 0 (add1 i)))
-      ((or (= (+ i position) (length entries)) (= i 10)))
-      (display i)
-      (display ") ")
-      (print-entry (list-ref entries (+ position i)))
-      (print)))
-
-  (define (get-urls entries position numlist)
-    (let loop ((result '()) (nums numlist))
-      (if (null? nums) result
-          (loop (cons (list-ref entries (+ position (car nums))) result) (cdr nums)))))
-
   (define (delete-entry entries e)
     (let loop ((temp entries))
       (if (string=? (entry-url e) (entry-url (car temp)))
         (cdr temp)
         (cons (car temp) (loop (cdr temp))))))
 
-  ; Print the first window before prompting
-  (print-window entries 0)
+  (let ([w (window entries)])
+    (print-entry-window w) ; Print the window before prompting
+    
+    (let loop ([cmd (subshell-prompt)])
+      (when (not (in (subshell-cmd-action cmd) '("quit" "q")))
+        (cond
+          [(in (subshell-cmd-action cmd) '("help" "?" "h")) (subshell-help)]
+          
+          ; Replace the tagline (add)
+          [(in (subshell-cmd-action cmd) '("add" "a"))
+            (for-each
+              (lambda (i)
+                (let ([e (window-ref w i)])
+                  (set-car! e (subshell-cmd-tagline cmd))
+                  (do-add (entry-url e) (entry-tagline e))))
+              (subshell-cmd-nums cmd))]
   
-  (let loop ((cmd (subshell-prompt)) (position 0))
-    (when (not (in (subshell-cmd-action cmd) '("quit" "q")))
-      (cond
-        ((in (subshell-cmd-action cmd) '("help" "?" "h")) (subshell-help))
-        
-        ; Replace the tagline (add)
-        ((in (subshell-cmd-action cmd) '("add" "a"))
-          (for-each
-            (lambda (e)
-              (set-car! e (subshell-cmd-tagline cmd))
-              (do-add (entry-url e) (entry-tagline e)))
-            (get-urls entries position (subshell-cmd-nums cmd))))
-
-        ; Append a tagline
-        ((in (subshell-cmd-action cmd) '("append" "aa"))
-          (for-each
-            (lambda (e)
-              (set-car! e (append (entry-tagline e) (subshell-cmd-tagline cmd)))
-              (do-add (entry-url e) (entry-tagline e)))
-            (get-urls entries position (subshell-cmd-nums cmd))))
-
-        ; Delete an entry
-        ((in (subshell-cmd-action cmd) '("delete" "d"))
-          (for-each
-            (lambda (e)
-              (do-delete (entry-url e))
-              (set! entries (delete-entry entries e)))
-            (get-urls entries position (subshell-cmd-nums cmd))))
-
-        ; Go to next window
-        ((in (subshell-cmd-action cmd) '("next" "]"))
-          (when (< position (- (length entries) 10))
-            (set! position (+ position 10))
-            (print-window entries position)))
-
-        ; Go to previous window
-        ((in (subshell-cmd-action cmd) '("prev" "["))
-          (when (<= 0 (- position 10)) 
-            (set! position (- position 10))
-            (print-window entries position)))
-
-        ; Display current window
-        ((in (subshell-cmd-action cmd) '("print" "p")) (print-window entries position))
-
-        ; I dunno
-        (else (print "Nothing to do with that.")))
-        
-      (loop (subshell-prompt) position))))
+          ; Append a tagline
+          [(in (subshell-cmd-action cmd) '("append" "aa"))
+            (for-each
+              (lambda (i)
+                (let ([e (window-ref w i)])
+                  (set-car! e (append (entry-tagline e) (subshell-cmd-tagline cmd)))
+                  (do-add (entry-url e) (entry-tagline e))))
+              (subshell-cmd-nums cmd))]
+  
+          ; Delete an entry
+          [(in (subshell-cmd-action cmd) '("delete" "d"))
+            (for-each
+              (lambda (i)
+                (let ([e (window-ref w i)])
+                  (do-delete (entry-url e))
+                  (set! entries (delete-entry entries e))
+                  (set! w (window w position: (window-position w)))))
+              (subshell-cmd-nums cmd))]
+  
+          ; Go to next window
+          [(in (subshell-cmd-action cmd) '("next" "]"))
+            (window-next! w)
+            (print-entry-window w)]
+  
+          ; Go to previous window
+          [(in (subshell-cmd-action cmd) '("prev" "["))
+            (window-prev! w)
+            (print-entry-window w)]
+  
+          ; Display current window
+          [(in (subshell-cmd-action cmd) '("print" "p")) (print-entry-window w)]
+  
+          ; I dunno
+          [else (print "Nothing to do with that.")])
+  
+        (loop (subshell-prompt))))))
 
 (define (subshell-prompt)
   (subshell-parse (linenoise "marks] ")))
@@ -124,11 +163,6 @@
 
 (define (subshell-cmd-tagline cmd)
   (vector-ref cmd 2))
-
-;(define (subshell-nums->urls entries position numlist)
-;    (let loop ((result '()) (nums numlist))
-;      (if (null? nums) result
-;          (loop (cons (list-ref entries (+ position (car nums))) result) (cdr nums)))))
 
 (define (subshell-help)
   (print "===============================================\n"
