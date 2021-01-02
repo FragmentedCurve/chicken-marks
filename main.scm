@@ -1,30 +1,14 @@
 (import (chicken process-context))
-(import (chicken condition))
 
 (declare (uses do-actions))
+(declare (uses key))
 (declare (uses config))
+(declare (uses utils))
 
-;;
-;; Return true if the needle is found in the list (haystack).
-;; If a comparision function (cmp) isn't given, equal? is used.
-;;
-(define (in needle haystack #!optional cmp)
-  (if (not cmp) (set! cmp equal?))
-  (let loop ()
-    (cond
-      ((= 0 (length haystack)) #f)
-      ((cmp needle (car haystack)) #t)
-      (else 
-        (set! haystack (cdr haystack))
-        (loop)))))
-
-(define (not-null? x)
-  (not (null? x)))
-  
 ;;
 ;; Help me!
 ;;
-(define (display-help)
+(define (main-help cmd . args)
   (begin
     (print "Usage: marks [action] [args...]\n" 
            "       marks [label]\n\n"
@@ -44,70 +28,108 @@
            "  kill kill kill                    Wipe out all your data from the cloud\n"
            "  help     (?)                      Display this")))
 
-(define (parse-cmd-args args)
-  (handle-exceptions e
-    (cond
-      ((and ((condition-predicate 'exn) e) ((condition-predicate 'type) e))
-        display-help) )
+(define (main-add cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- You need to give a URL and tagline."))
+    ([= (length args) 1]
+      (print "Error -- You must give a tagline for " (car args)))
+    (else
+      (do-add (car args) (apply string->tagline (cdr args))))))
 
-    (let ((action (car args)))
-      (cond
-        ((string=? action "ls")
-          do-list-all)
-        ((string=? action "key")
-          do-key)
-        ((string=? action "raw")
-          do-raw)
-        ((in action '("help" "?" "h"))
-          display-help)
+(define (main-append cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- You need to give a URL and tagline."))
+    ([= (length args) 1]
+      (print "Error -- You must give a tagline for " (car args)))
+    (else
+      (do-append (car args) (apply string->tagline (cdr args))))))
 
-        ((string=? action "ingest")
-          do-ingest)
-        ((string=? action "import")
-          do-import)
+(define (main-delete cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- You need to give a URL."))
+    (else
+      (do-delete (car args)))))
 
-        ((in action '("search" "s"))
-          do-search)
-        ((in action '("tag" "t"))
-          do-tag-search)
-        ((in action '("url" "u"))
-          do-url-search)
-        ((in action '("add" "a"))
-          do-add)
-        ((in action '("delete" "d"))
-          do-delete)
-        (else (lambda () (print "Nothing to do.")))))))
+(define (main-search cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- A URL substring is needed and tags."))
+    ([= (length args) 1]
+      (print "Error -- You must also give a tags to search."))
+    (else
+      (do-search (car args) (apply string->tagline (cdr args))))))
+
+(define (main-tag cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- Tags are needed."))
+    (else
+      (do-tag-search (apply string->tagline args)))))
+
+(define (main-url cmd . args)
+  (cond
+    ([null? args]
+      (print "Error -- A URL substring is needed."))
+    (else
+      (do-url-search (car args)))))
+
+(define (main-ls cmd . args)
+  (do-list-all))
+
+(define (main-keys cmd . args)
+  (print cmd args))
+
+(define (main-key cmd . args)
+  (print cmd args))
+
+(define (main-raw cmd . args)
+  (do-raw))
+  
+(define (main-ingest cmd . args)
+  (print cmd args))
+  
+(define (main-import cmd . args)
+  (print cmd args))
+  
+(define (main-kill cmd . args)
+  (print cmd args))
+
+(define (main-nothing cmd . args)
+  (print "Nothing to do."))
 
 ;;
-;; Let's do this!
+;; Returns a function with the definition of (func cmd . args)
 ;;
+(define (main-parse args)
+  (cond
+    ; TODO Check if action is a key label. If yes, switch to that key.
+    ([null? args] (main-help))
+    ([in (car args) '("add" "a")] main-add)
+    ([in (car args) '("append" "aa")] main-append)
+    ([in (car args) '("delete" "d")] main-delete)
+    ([in (car args) '("search" "s")] main-search)
+    ([in (car args) '("tag" "t")] main-tag)
+    ([in (car args) '("url" "u")] main-url)
+    ([in (car args) '("ls")] main-ls)
+    ([in (car args) '("keys")] main-keys)
+    ([in (car args) '("key")] main-key)
+    ([in (car args) '("raw")] main-raw)
+    ([in (car args) '("ingest")] main-ingest)
+    ([in (car args) '("import")] main-import)
+    ([in (car args) '("kill")] main-kill)
+    ([in (car args) '("help" "?")] main-help)
+    (else main-nothing)))
+  
 (define (main)
   (init-config)  ; Makes a plist called marks-settings
 
-  (handle-exceptions e
-    (cond 
-      ((and ((condition-predicate 'exn) e) ((condition-predicate 'args) e))
-        (begin
-          (print "Not enough information given.")
-          (exit 1)))
-      (else (abort e)))
-
-    (let*
-      ((args (command-line-arguments)) (action (parse-cmd-args args)))
-
-      (cond
-        ((in action (list display-help do-list-all do-raw) eq?)
-          (action) )
-        ((in action (list do-search do-add) eq?)
-          (let ((first (car (cdr args))) (second (cdr (cdr args))))
-            (if (= 0 (length second))
-              (abort (make-composite-condition (make-property-condition 'exn) (make-property-condition 'args)))) 
-            (action (car (cdr args)) (apply string->tagline (cdr (cdr args))))))
-        ((in action (list do-delete do-import do-ingest do-url-search) eq?)
-          (action (car (cdr args))))
-        ((in action (list do-tag-search))
-          (action (apply string->tagline (cdr args))))
-        (else (action)))))
-  (exit 0))
+  (let ([args (command-line-arguments)])
+    (cond
+      ([null? args] (main-help '()))  ; Display help by default
+      (else
+        (apply (main-parse args) args)))))
 
 (main)
