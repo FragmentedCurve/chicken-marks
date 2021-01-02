@@ -122,7 +122,7 @@
     ([in (car args) '("kill")] main-kill)
     ([in (car args) '("help" "?")] main-help)
     (else main-nothing)))
-  
+
 (define (main)
   (init-config)  ; Makes a plist called marks-settings
 
