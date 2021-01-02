@@ -5,7 +5,6 @@
 (import srfi-1)
 (import linenoise)
 (import (chicken string))
-(import (chicken io))
 (import (chicken format))
 
 ;;
