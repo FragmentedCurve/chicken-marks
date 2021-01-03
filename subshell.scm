@@ -119,13 +119,17 @@
   
           ; Go to next window
           [(in (subshell-cmd-action cmd) '("next" "]"))
-            (window-next! w)
-            (print-entry-window w)]
+            (let ([old (window-position w)])
+              (window-next! w)
+              (when (not (= old (window-position w))) ; Don't print if at the edge of window
+                (print-entry-window w)))]
   
           ; Go to previous window
           [(in (subshell-cmd-action cmd) '("prev" "["))
-            (window-prev! w)
-            (print-entry-window w)]
+            (let ([old (window-position w)])
+              (window-prev! w)
+              (when (not (= old (window-position w))) ; Don't print if at the edge of window
+                (print-entry-window w)))]
   
           ; Display current window
           [(in (subshell-cmd-action cmd) '("print" "p")) (print-entry-window w)]
