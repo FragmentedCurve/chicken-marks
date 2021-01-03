@@ -31,3 +31,18 @@
     [(equal? c #\9) 9]
     [else #f]))
     
+; TODO: This whitespace functions are shit. CLEAN THEM!
+(define (clear-left-whitespace s)
+  (set! s (string->list s))
+  (do ((c (car s) (car s)))
+    ((not (or (equal? c #\space) (equal? c #\tab))) (list->string s))
+    (set! s (cdr s))))
+
+(define (clear-right-whitespace s)
+  (list->string (reverse (string->list
+    (clear-left-whitespace
+      (list->string
+        (reverse (string->list s))))))))
+
+(define (clear-whitespace s)
+  (clear-right-whitespace (clear-left-whitespace s)))

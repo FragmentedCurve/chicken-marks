@@ -9,15 +9,15 @@
 
 (define (do-list-all)
   (print-entry-list (bookie-parse
-    (bookie-search (bookie-server) (cdr marks-current-key) "" ""))))
+    (bookie-search (bookie-server) [config-key (config-default-key)] "" ""))))
 
 (define (do-raw)
   (display (string-chomp
-    (bookie-search (bookie-server) (cdr marks-current-key) "" ""))))
+    (bookie-search (bookie-server) [config-key (config-default-key)] "" ""))))
 
 (define (do-search url tag-list)
   (let ((entries (bookie-parse
-      (bookie-search (bookie-server) (cdr marks-current-key)
+      (bookie-search (bookie-server) [config-key (config-default-key)]
         url
         (tagline->string tag-list)))))
 
@@ -32,10 +32,10 @@
   (do-search url-snippet '()))
 
 (define (do-add url tagline)
-  (bookie-add (bookie-server) (cdr marks-current-key) url (tagline->string tagline)))
+  (bookie-add (bookie-server) [config-key (config-default-key)] url (tagline->string tagline)))
 
 (define (do-append url tagline)
-  (let ([entry (bookie-parse (bookie-search (bookie-server) (cdr marks-current-key)  url ""))])
+  (let ([entry (bookie-parse (bookie-search (bookie-server) [config-key (config-default-key)]  url ""))])
     (cond
       ([null? entry]
         (print "Error -- Failed to find an entry with URL: " url))
@@ -45,10 +45,10 @@
         (do-add url (append (entry-tagline (car entry)) tagline))))))
   
 (define (do-delete url)
-  (bookie-delete (bookie-server) (cdr marks-current-key) url ""))
+  (bookie-delete (bookie-server) [config-key (config-default-key)] url ""))
 
 (define (do-kill)
-  (bookie-kill (bookie-server) (cdr marks-current-key)))
+  (bookie-kill (bookie-server) [config-key (config-default-key)]))
 
 (define (do-import filename)
   (print filename))

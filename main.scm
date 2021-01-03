@@ -1,32 +1,32 @@
-(import (chicken process-context))
-
 (declare (uses do-actions))
 (declare (uses key))
 (declare (uses config))
 (declare (uses utils))
 
+(import (chicken process-context))
+(import (chicken plist))
+
 ;;
 ;; Help me!
 ;;
-(define (main-help cmd . args)
-  (begin
-    (print "Usage: marks [action] [args...]\n" 
-           "       marks [label]\n\n"
-           "Action Details:\n"
-           "  add      (a)   [url]  [tagline]   Add an entry\n"
-           "  append   (aa)  [url]  [tagline]   Append tags to the end of the tagline\n"
-           "  delete   (d)   [url]              Delete an entry\n"
-           "  search   (s)   [url]  [tags]      Search url and tags\n"
-           "  tag      (t)   [tags]             Search taglines for the given tags\n"
-           "  url      (u)   [url]              Search url\n"
-           "  ls                                List all entries\n"
-           "  keys                              List all keys\n"
-           "  key                               Sub menu for managing keys\n"
-           "  raw                               Output raw database dump\n"
-           "  ingest         [filename]         Import a bookie backup file\n"
-           "  import         [filename]         Import Netscape bookmark file\n"
-           "  kill kill kill                    Wipe out all your data from the cloud\n"
-           "  help     (?)                      Display this")))
+(define (main-help #!optional cmd . args)
+  (print "Usage: marks [action] [args...]\n" 
+         "       marks [label]\n\n"
+         "Action Details:\n"
+         "  add      (a)   [url]  [tagline]   Add an entry\n"
+         "  append   (aa)  [url]  [tagline]   Append tags to the end of the tagline\n"
+         "  delete   (d)   [url]              Delete an entry\n"
+         "  search   (s)   [url]  [tags]      Search url and tags\n"
+         "  tag      (t)   [tags]             Search taglines for the given tags\n"
+         "  url      (u)   [url]              Search url\n"
+         "  ls                                List all entries\n"
+         "  keys                              List all keys\n"
+         "  key                               Sub menu for managing keys\n"
+         "  raw                               Output raw database dump\n"
+         "  ingest         [filename]         Import a bookie backup file\n"
+         "  import         [filename]         Import Netscape bookmark file\n"
+         "  kill kill kill                    Wipe out all your data from the cloud\n"
+         "  help     (?)                      Display this"))
 
 (define (main-add cmd . args)
   (cond
@@ -76,37 +76,42 @@
     (else
       (do-url-search (car args)))))
 
-(define (main-ls cmd . args)
+(define (main-ls #!optional cmd . args)
   (do-list-all))
 
-(define (main-keys cmd . args)
-  (print cmd args))
+(define (main-keys #!optional cmd . args)
+  (key-main '("list")))
 
 (define (main-key cmd . args)
-  (print cmd args))
+  (key-main args))
 
-(define (main-raw cmd . args)
+(define (main-raw #!optional cmd . args)
   (do-raw))
   
 (define (main-ingest cmd . args)
+  ; TODO implement
   (print cmd args))
   
 (define (main-import cmd . args)
+  ; TODO implement
   (print cmd args))
   
 (define (main-kill cmd . args)
+  ; TODO implement
   (print cmd args))
 
 (define (main-nothing cmd . args)
   (print "Nothing to do."))
+
+(define (main-key-switch cmd . args)
+  (key-main `("use" ,cmd)))
 
 ;;
 ;; Returns a function with the definition of (func cmd . args)
 ;;
 (define (main-parse args)
   (cond
-    ; TODO Check if action is a key label. If yes, switch to that key.
-    ([null? args] (main-help))
+    ([null? args] main-help)
     ([in (car args) '("add" "a")] main-add)
     ([in (car args) '("append" "aa")] main-append)
     ([in (car args) '("delete" "d")] main-delete)
@@ -121,15 +126,14 @@
     ([in (car args) '("import")] main-import)
     ([in (car args) '("kill")] main-kill)
     ([in (car args) '("help" "?")] main-help)
+    ([in (string->symbol (car args)) (config-key-labels)] main-key-switch)
     (else main-nothing)))
 
 (define (main)
   (init-config)  ; Makes a plist called marks-settings
 
   (let ([args (command-line-arguments)])
-    (cond
-      ([null? args] (main-help '()))  ; Display help by default
-      (else
-        (apply (main-parse args) args)))))
+    (apply (main-parse args) args))
+  (save-config))
 
 (main)
