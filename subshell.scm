@@ -114,7 +114,7 @@
                 (let ([e (window-ref w i)])
                   (do-delete (entry-url e))
                   (set! entries (delete-entry entries e))
-                  (set! w (window w position: (window-position w)))))
+                  (set! w (window entries position: (window-position w)))))
               (subshell-cmd-nums cmd))]
   
           ; Go to next window
