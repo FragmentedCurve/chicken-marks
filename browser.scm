@@ -5,6 +5,25 @@
 (import (chicken process))
 (import (chicken process-context))
 
+(define possible-unix-browsers
+  '("xdg-open"
+    "brave"
+    "firefox"
+    "chromium"
+    "chrome"
+    "google-chrome"
+    "google-chrome-stable"
+    "midori"
+    "ditto"
+    "surf"
+    "elinks"
+    "links"
+    "lynx"))
+
+(define possible-windows-browsers '())
+
+(define possible-macos-browsers '())
+
 ;;
 ;; Returns true if the file exists and is executable.
 ;;
@@ -16,20 +35,22 @@
 ;;
 (define (search-unix-path filename)
   (let loop ([paths (string-split (get-environment-variable "PATH") ":")])
-    (let* ([dir (car paths)] [path (make-pathname dir filename)])
-      (cond
-        [(null? path) #f]
-        [(executable-exists? path) path]
-        [else (loop (cdr paths))]))))
+    (cond
+      [(null? paths) #f]
+      [(executable-exists? (make-pathname (car paths) filename))
+        (make-pathname (car paths) filename)]
+      [else (loop (cdr paths))])))
 
-;;
-;; Attempt to open the URL by using xdg-open to find the default browser.
-;;
-(define (browser-via-xdg url)
-  (let ([xdg-path (search-unix-path "xdg-open")])
-    (if xdg-path
-      (process-run (conc "sh -c '2>&1 " xdg-path " " url " > /dev/null'")) ; Shell command: sh -c '2>&1 xdg-open URL > /dev/null'
-      #f)))
+(define (run-unix-browser browser url)
+  (process-run (conc "sh -c \"2>&1 " browser " '" url "' > /dev/null &\"")))
+
+(define (open-unix-browser url)
+  (let loop ([browsers possible-unix-browsers])
+    (let ([browser (search-unix-path (car browsers))])
+      (cond
+        [browser (run-unix-browser browser url)]
+        [(null? browsers) #f]
+        [else (loop (cdr browsers))]))))
 
 ;;
 ;; Open a URL in the user's default browser.
@@ -40,6 +61,6 @@
       [(eq? 'windows platform)
         (error-msg "Can't open the browser on windows yet.")]
       [(eq? 'unix platform)
-        (when (not (browser-via-xdg url))
-          (error-msg "Unable to open browser. Failed to find xdg-open."))]
+        (when (not (open-unix-browser url))
+          (error-msg "Unable to find a browser."))]
       [else (error-msg "Your platform isn't supported for opening a browser.")])))
