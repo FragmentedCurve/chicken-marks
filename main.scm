@@ -89,8 +89,9 @@
   (do-raw))
   
 (define (main-ingest cmd . args)
-  ; TODO implement
-  (print cmd args))
+  (cond
+    ([null? args] (print "Error -- No filename given."))
+    (else (do-ingest (car args)))))
   
 (define (main-import cmd . args)
   ; TODO implement

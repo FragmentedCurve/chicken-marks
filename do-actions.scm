@@ -6,6 +6,7 @@
 
 (import (chicken plist))
 (import (chicken string))
+(import (chicken io))
 
 (define (do-list-all)
   (print-entry-list (bookie-parse
@@ -54,7 +55,12 @@
   (print filename))
 
 (define (do-ingest filename)
-  (print filename))
+  (let ([file (open-input-file filename)])
+    ; TODO Handle errors when opening the file fails
+    (for-each (lambda (e)
+        (print "Ingesting -- " (entry-url e))
+        (do-add (entry-url e) (entry-tagline e)))
+      (bookie-parse (apply conc (intersperse (read-lines file) "\n"))))))
 
 (define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix ""))
   (display prefix)
