@@ -41,9 +41,9 @@
   (let ([entry (bookie-parse (bookie-search (bookie-server) [config-key (config-default-key)]  url ""))])
     (cond
       ([null? entry]
-        (print "Error -- Failed to find an entry with URL: " url))
+        (error-msg "Failed to find an entry with URL: " url))
       ([> (length entry) 1]
-        (print "Error -- Too many entries found with URL: " url))
+        (error-msg "Too many entries found with URL: " url))
       (else
         (do-add url (append (entry-tagline (car entry)) tagline))))))
   
@@ -54,7 +54,7 @@
   (bookie-kill (bookie-server) [config-key (config-default-key)]))
 
 (define (do-import filename)
-  (print filename))
+  (error-msg "Importing is not implemented yet."))
 
 (define (do-ingest filename)
   (let ([file (open-input-file filename)])

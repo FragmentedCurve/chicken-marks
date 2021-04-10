@@ -31,48 +31,48 @@
 (define (main-add cmd . args)
   (cond
     ([null? args]
-      (print "Error -- You need to give a URL and tagline."))
+      (error-msg "You need to give a URL and tagline."))
     ([= (length args) 1]
-      (print "Error -- You must give a tagline for " (car args)))
+      (error-msg  "You must give a tagline for " (car args)))
     (else
       (do-add (car args) (apply string->tagline (cdr args))))))
 
 (define (main-append cmd . args)
   (cond
     ([null? args]
-      (print "Error -- You need to give a URL and tagline."))
+      (error-msg  "You need to give a URL and tagline."))
     ([= (length args) 1]
-      (print "Error -- You must give a tagline for " (car args)))
+      (error-msg "You must give a tagline for " (car args)))
     (else
       (do-append (car args) (apply string->tagline (cdr args))))))
 
 (define (main-delete cmd . args)
   (cond
     ([null? args]
-      (print "Error -- You need to give a URL."))
+      (error-msg "You need to give a URL."))
     (else
       (do-delete (car args)))))
 
 (define (main-search cmd . args)
   (cond
     ([null? args]
-      (print "Error -- A URL substring is needed and tags."))
+      (error-msg "A URL substring is needed and tags."))
     ([= (length args) 1]
-      (print "Error -- You must also give a tags to search."))
+      (error-msg "You must also give a tags to search."))
     (else
       (do-search (car args) (apply string->tagline (cdr args))))))
 
 (define (main-tag cmd . args)
   (cond
     ([null? args]
-      (print "Error -- Tags are needed."))
+      (error-msg "Tags are needed."))
     (else
       (do-tag-search (apply string->tagline args)))))
 
 (define (main-url cmd . args)
   (cond
     ([null? args]
-      (print "Error -- A URL substring is needed."))
+      (error-msg "A URL substring is needed."))
     (else
       (do-url-search (car args)))))
 
@@ -90,12 +90,12 @@
   
 (define (main-ingest cmd . args)
   (cond
-    ([null? args] (print "Error -- No filename given."))
+    ([null? args] (error-msg "No filename given."))
     (else (do-ingest (car args)))))
   
 (define (main-import cmd . args)
   ; TODO implement
-  (print cmd args))
+  (do-import (car args)))
   
 (define (main-kill cmd . args)
   ; TODO implement

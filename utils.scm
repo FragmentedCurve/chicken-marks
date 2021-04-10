@@ -1,5 +1,6 @@
 (declare (unit utils))
 
+(import (chicken string))
 (import (chicken platform))
 (import (chicken process))
 
@@ -50,10 +51,14 @@
 (define (clear-whitespace s)
   (clear-right-whitespace (clear-left-whitespace s)))
 
+(define (error-msg x . y)
+  (display (conc "Error -- " x))
+  (apply print y))
+    
 (define (open-browser url)
   (cond
     [(eq? 'windows (software-type))
-      (print "Error -- Can't open the browser on windows yet.")]
+      (error-msg "Can't open the browser on windows yet.")]
     [(eq? 'unix (software-type))
       (process-run "xdg-open" (list url))]
-    [else (print "Error -- Can't open browser on your platform")]))
+    [else (error-msg "Can't open browser on your platform")]))

@@ -19,37 +19,37 @@
 (define (key-add cmd . args)
   (cond
     ([null? args]
-      (print "Error -- No label (and key) given."))
+      (error-msg "No label (and key) given."))
     ([= (length args) 1]
       (config-key (string->symbol (car args)) (bookie-generate-key)))
     ([= (length args) 2]
       (if (bookie-key? (cadr args))
         (config-key (string->symbol (car args)) (cadr args))
-        (print "Error -- Invalid bookie key: " (cadr args))))))
+        (error-msg "Invalid bookie key: " (cadr args))))))
       
 (define (key-use cmd . args)
   (cond
     ([null? args]
-      (print "Error -- No label given."))
+      (error-msg "No label given."))
     ([config-key (string->symbol (car args))]
       (let* ([label (string->symbol (car args))] [key (config-key label)])
         (print "Now using: " label " (" key ")")
         (config-default-key label)))
     (else
-      (print "Error -- Invalid label."))))
+      (error-msg "Invalid label."))))
 
 (define (key-copy cmd . args)
   (cond
     ([null? args]
-      (print "Error -- No source and destination label were given."))
+      (error-msg "No source and destination label were given."))
     ([= (length args) 1]
-      (print "Error -- A destination label is needed."))
+      (error-msg "A destination label is needed."))
     (else
       (apply key-add (list "copy" (cadr args) (config-key (string->symbol (car args))))))))
 
 (define (key-delete cmd . args)
   (if [null? args]
-    (print "Error -- No label given.")
+    (error-msg "No label given.")
     (config-key-del! (string->symbol (car args)))))
     
 (define (key-list #!optional cmd . args)
