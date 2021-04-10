@@ -23,7 +23,9 @@
         (tagline->string tag-list)))))
 
     (if (= 1 (length entries))
-      (print-entry (car entries))
+      (begin
+        (print-entry (car entries))
+        (open-browser (entry-url (car entries))))
       (marks-subshell entries))))
   
 (define (do-tag-search tag-list)

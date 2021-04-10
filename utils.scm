@@ -1,5 +1,8 @@
 (declare (unit utils))
 
+(import (chicken platform))
+(import (chicken process))
+
 ;;
 ;; Return true if the needle is found in the list (haystack).
 ;; If a comparision function (cmp) isn't given, equal? is used.
@@ -46,3 +49,11 @@
 
 (define (clear-whitespace s)
   (clear-right-whitespace (clear-left-whitespace s)))
+
+(define (open-browser url)
+  (cond
+    [(eq? 'windows (software-type))
+      (print "Error -- Can't open the browser on windows yet.")]
+    [(eq? 'unix (software-type))
+      (process-run "xdg-open" (list url))]
+    [else (print "Error -- Can't open browser on your platform")]))

@@ -51,7 +51,7 @@
 (define (window-ref w i)
   (list-ref (vector-ref w 0) (window-abs w i)))
 
-(define (window-for-each w f)  
+(define (window-for-each w f)
   (do
     ([i 0 (add1 i)])
     ([not (valid-window-index? w i)])
@@ -93,28 +93,31 @@
           [(in (subshell-cmd-action cmd) '("add" "a"))
             (for-each
               (lambda (i)
-                (let ([e (window-ref w i)])
-                  (set-car! e (subshell-cmd-tagline cmd))
-                  (do-add (entry-url e) (entry-tagline e))))
+                (when (valid-window-index? w i)
+                  (let ([e (window-ref w i)])
+                    (set-car! e (subshell-cmd-tagline cmd))
+                    (do-add (entry-url e) (entry-tagline e)))))
               (subshell-cmd-nums cmd))]
   
           ; Append a tagline
           [(in (subshell-cmd-action cmd) '("append" "aa"))
             (for-each
               (lambda (i)
-                (let ([e (window-ref w i)])
-                  (set-car! e (append (entry-tagline e) (subshell-cmd-tagline cmd)))
-                  (do-add (entry-url e) (entry-tagline e))))
+                (when (valid-window-index? w i)
+                  (let ([e (window-ref w i)])
+                    (set-car! e (append (entry-tagline e) (subshell-cmd-tagline cmd)))
+                    (do-add (entry-url e) (entry-tagline e)))))
               (subshell-cmd-nums cmd))]
   
           ; Delete an entry
           [(in (subshell-cmd-action cmd) '("delete" "d"))
             (for-each
               (lambda (i)
-                (let ([e (window-ref w i)])
-                  (do-delete (entry-url e))
-                  (set! entries (delete-entry entries e))
-                  (set! w (window entries position: (window-position w)))))
+                (when (valid-window-index? w i)
+                  (let ([e (window-ref w i)])
+                    (do-delete (entry-url e))
+                    (set! entries (delete-entry entries e))
+                    (set! w (window entries position: (window-position w))))))
               (subshell-cmd-nums cmd))]
   
           ; Go to next window
@@ -133,7 +136,15 @@
   
           ; Display current window
           [(in (subshell-cmd-action cmd) '("print" "p")) (print-entry-window w)]
-  
+
+          ; Open the URLs in the browser
+          [(in (subshell-cmd-action cmd) '("open" "o"))
+            (for-each (lambda (i)
+                (when (valid-window-index? w i)
+                  (let ([e (window-ref w i)])
+                    (open-browser (entry-url e)))))
+              (subshell-cmd-nums cmd))]
+          
           ; I dunno
           [else (print "Nothing to do with that.")])
   
@@ -171,7 +182,8 @@
   (print "===============================================\n"
          "add    (a)   [0-9]... [tags]   Replace tags\n"
          "append (aa)  [0-9]... [tags]   Append tags\n"
-         "delete (d)   [0-9]...          Delete entries\n\n"
+         "delete (d)   [0-9]...          Delete entries\n"
+         "open   (o)   [0-9]...          Open entries\n\n"
          
          "next   (])\n"
          "prev   ([)\n"
