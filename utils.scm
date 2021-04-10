@@ -54,11 +54,3 @@
 (define (error-msg x . y)
   (display (conc "Error -- " x))
   (apply print y))
-    
-(define (open-browser url)
-  (cond
-    [(eq? 'windows (software-type))
-      (error-msg "Can't open the browser on windows yet.")]
-    [(eq? 'unix (software-type))
-      (process-run "xdg-open" (list url))]
-    [else (error-msg "Can't open browser on your platform")]))
