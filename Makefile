@@ -1,7 +1,8 @@
 CHICKEN_CSC ?= chicken-csc
 EGGS := openssl,http-client
 CSC_FLAGS := -static -O3 -link $(EGGS)
-SSL_FLAGS :=  -L "$(shell pkg-config --libs openssl)"
+#SSL_FLAGS :=  -L "$(shell pkg-config --libs openssl)"
+SSL_FLAGS := -L "-lssl -lcrypto"
 CSC_STATIC_FLAGS := -L "-static"
 
 SOURCES := main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm browser.scm
