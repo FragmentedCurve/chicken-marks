@@ -5,6 +5,12 @@
 (import (chicken process))
 (import (chicken process-context))
 
+;;
+;; A list of possible browsers for marks to use.
+;; They all accept a URL as an argument.
+;;
+;; Example: browser-command [url]
+;;
 (define possible-unix-browsers
   '("xdg-open"
     "brave"
@@ -41,16 +47,22 @@
         (make-pathname (car paths) filename)]
       [else (loop (cdr paths))])))
 
+;;
+;; Execute the browser process.
+;;
 (define (run-unix-browser browser url)
   (process-run (conc "sh -c \"2>&1 " browser " '" url "' > /dev/null &\"")))
 
+;;
+;; Find & Open a browser on a UNIX-like OS.
+;;
 (define (open-unix-browser url)
   (let loop ([browsers possible-unix-browsers])
-    (let ([browser (search-unix-path (car browsers))])
-      (cond
-        [browser (run-unix-browser browser url)]
-        [(null? browsers) #f]
-        [else (loop (cdr browsers))]))))
+    (if (null? browsers) #f
+      (let ([browser (search-unix-path (car browsers))])
+        (if browser
+          (run-unix-browser browser url)
+          (loop (cdr browsers)))))))
 
 ;;
 ;; Open a URL in the user's default browser.
@@ -58,8 +70,6 @@
 (define (open-browser url)
   (let ([platform (software-type)] [version (software-version)])
     (cond
-      [(eq? 'windows platform)
-        (error-msg "Can't open the browser on windows yet.")]
       [(eq? 'unix platform)
         (when (not (open-unix-browser url))
           (error-msg "Unable to find a browser."))]
