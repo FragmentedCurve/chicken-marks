@@ -53,7 +53,8 @@
 ;; Execute the browser process.
 ;;
 (define (run-unix-browser browser url)
-  (process-run (conc "sh -c \"2>&1 " browser " '" url "' > /dev/null &\"")))
+  (process-fork (lambda ()
+      (process-execute browser (list url)))))
 
 ;;
 ;; Find & Open a browser on a UNIX-like OS.
