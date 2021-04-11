@@ -12,6 +12,7 @@ MARKS_STATIC := marks-static
 MARKS_DOCKER := marks-docker
 
 DOCKER := docker
+STRIP := strip -s
 
 .PHONY: static docker help
 
@@ -34,6 +35,7 @@ $(MARKS_DOCKER): $(SOURCES)
 	$(DOCKER) create --name $(MARKS_DOCKER) $(MARKS_DOCKER)
 	$(DOCKER) cp $(MARKS_DOCKER):/marks/$(MARKS_STATIC) ./$(MARKS_DOCKER)
 	$(DOCKER) rm $(MARKS_DOCKER)
+	$(STRIP) $(MARKS_DOCKER)
 
 help:
 	@echo "Targets:"
@@ -43,4 +45,4 @@ help:
 	@echo "  help          Print this."
 
 clean:
-	$(RM) $(OBJECTS:.o=.link) $(OBJECTS) $(MARKSEXE) $(MARKS_STATIC)
+	$(RM) $(OBJECTS:.o=.link) $(OBJECTS) $(MARKSEXE) $(MARKS_STATIC) $(MARKS_DOCKER)
