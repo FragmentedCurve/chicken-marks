@@ -1,0 +1,38 @@
+chicken-marks
+=============
+
+marks is the official power-user client for bookie. Manage all your
+bookmarks in the cloud from your terminal. For a detailed description
+on how to use marks, read TUTORIAL.md.
+
+This particular version is implemented in Chicken Scheme.
+
+Features
+========
+
+All of the bookie features are supported.
+Manage multiple keys.
+Bulk tagline replacement, tag appending, and bookmark deleting.
+Import browser backups.
+Integration with default web browser & your operating system's clipboard.
+
+Runtime Requirements
+==================
+
+  - OpenSSL
+
+Build Requirements
+==================
+
+  - chicken 5
+  - http-client
+  - srfi-1
+  - linenoise
+
+Building
+========
+
+$ git clone https://github.com/FragmentedCurve/chicken-marks.git
+$ cd chicken-marks
+$ chicken-install http-client srfi-1 linenoise
+$ make
