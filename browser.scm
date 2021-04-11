@@ -1,3 +1,5 @@
+(declare (unit browser))
+
 (import (chicken string))
 (import (chicken file))
 (import (chicken pathname))

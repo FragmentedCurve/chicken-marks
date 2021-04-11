@@ -1,6 +1,7 @@
 (declare (unit subshell))
 (declare (uses bookie))
 (declare (uses utils))
+(declare (uses browser))
 
 (import srfi-1)
 (import linenoise)

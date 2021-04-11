@@ -3,6 +3,7 @@
 (declare (uses bookie))
 (declare (uses config))
 (declare (uses subshell))
+(declare (uses browser))
 
 (import (chicken plist))
 (import (chicken string))

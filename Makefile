@@ -4,7 +4,7 @@ CSC_FLAGS := -static -O3  $(foreach egg, $(EGGS), -link $(egg) -R $(egg))
 SSL_FLAGS :=  -L "$(shell pkg-config --libs openssl)"
 
 
-SOURCES=main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm
+SOURCES=main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm browser.scm
 
 all: marks
 
