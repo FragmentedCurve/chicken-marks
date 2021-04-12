@@ -12,6 +12,6 @@ RUN make clean \
 FROM alpine
 WORKDIR /marks
 COPY --from=marks-builder /src/marks ./
-COPY --from=marks-builder /src/marks-static ./
+COPY --from=marks-builder /src/marks.static ./
 
 ENTRYPOINT ["./marks"]
