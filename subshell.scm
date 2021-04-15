@@ -7,6 +7,7 @@
 (import linenoise)
 (import (chicken string))
 (import (chicken format))
+(import (chicken sort))
 
 ;;
 ;; Returns a vector of the form: #(entry-list position window-size)
@@ -112,14 +113,26 @@
   
           ; Delete an entry
           [(in (subshell-cmd-action cmd) '("delete" "d"))
+            ; Delete from bookie server
             (for-each
               (lambda (i)
                 (when (valid-window-index? w i)
-                  (let ([e (window-ref w i)])
-                    (do-delete (entry-url e))
-                    (set! entries (delete-entry entries e))
-                    (set! w (window entries position: (window-position w))))))
-              (subshell-cmd-nums cmd))]
+                  (do-delete
+                    (entry-url (window-ref w i)))))
+              (subshell-cmd-nums cmd))
+
+            ; Remove entries from window
+            ; TODO This is a mess, clean it.
+            (let ([nums (sort (subshell-cmd-nums cmd) <)] [count 0])
+              (do
+                ([nums nums (cdr nums)]
+                 [count count (add1 count)]
+                 [i (car nums) (- (car nums) count)])
+                 ([null? nums])
+                 (when (valid-window-index? w i)
+                   (let ([e (window-ref w i)])
+                     (set! entries (delete-entry entries e))
+                     (set! w (window entries position: (window-position w)))))))]
   
           ; Go to next window
           [(in (subshell-cmd-action cmd) '("next" "]"))
