@@ -13,8 +13,10 @@
 (import (chicken port))
 
 (define (do-list-all)
-  (print-entry-list (bookie-parse
-    (bookie-search (bookie-server) [config-key (config-default-key)] "" ""))))
+  (print-entry-list
+    (bookie-parse
+      (bookie-search (bookie-server) [config-key (config-default-key)] "" ""))
+    do-color: (terminal-port? (current-output-port))))
 
 (define (do-raw)
   (display (string-chomp
@@ -31,7 +33,7 @@
     (if (terminal-port? (current-output-port))
       (if (= 1 (length entries))
         (begin
-          (print-entry (car entries))
+          (print-entry (car entries) do-color: #t)
           (open-browser (entry-url (car entries))))
         (marks-subshell entries))
       (print-entry-list entries))))
@@ -70,28 +72,35 @@
     (for-each (lambda (e)
         (print "Ingesting -- " (entry-url e))
         (do-add (entry-url e) (entry-tagline e)))
-      (bookie-parse (apply conc (intersperse (read-lines file) "\n"))))))
+      (bookie-parse (string-intersperse (read-lines file) "\n")))))
 
-(define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix ""))
+(define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix "") (do-color #f))
   (display prefix)
-  (print
-    line-prefix
-    (colorize
-      (conc "TAGS : " (tagline->string (entry-tagline e)))
-      (config 'tagline-fg-color))
-    line-suffix)
-  (print
-    line-prefix
-    (colorize
-      (conc "URL  : " (entry-url e))
-      (config 'urlline-fg-color))
-    line-suffix)
+
+  (let ([tagline (conc "TAGS : " (tagline->string (entry-tagline e)))])
+    (print
+      line-prefix
+      (if do-color
+        (colorize tagline (config 'tagline-fg-color))
+        tagline)
+      line-suffix))
+
+  (let ([urlline (conc "URL  : " (entry-url e))])
+    (print
+      line-prefix
+      (if do-color
+        (colorize
+          urlline
+          (config 'urlline-fg-color))
+        urlline)
+      line-suffix))
+
   (display suffix))
   
-(define (print-entry-list data)
+(define (print-entry-list data #!key (do-color #f))
   (let loop ([walk data] [sep ""])
     (when (not (null? walk))
-      (print-entry (car walk) prefix: sep)
+      (print-entry (car walk) prefix: sep do-color: do-color)
       (loop (cdr walk) "\n"))))
 
 (define (colorize s color)
