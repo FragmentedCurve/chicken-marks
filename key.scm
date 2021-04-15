@@ -6,8 +6,8 @@
 ;; Help key me!
 ;;
 (define (key-help #!optional cmd . args)
-  (print "Usage: marks key [action] [args...]\n"
-         "Details:\n"
+  (print "Usage: marks key [action] [args...]\n\n"
+         "Action Details:\n"
 		 "  add         [label] [key]             Add a key with a label\n"
 		 "  use    (s)  [label]                   Switch the default key\n"
 		 "  copy   (c)  [src label] [dest label]  Copy the key from one label to another label\n"
