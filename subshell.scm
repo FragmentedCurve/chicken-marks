@@ -85,7 +85,7 @@
   (let ([w (window entries)])
     (print-entry-window w) ; Print the window before prompting
     
-    (let loop ([cmd (subshell-prompt)])
+    (let loop ([cmd (subshell-prompt w)])
       (when (not (in (subshell-cmd-action cmd) '("quit" "q")))
         (cond
           [(in (subshell-cmd-action cmd) '("help" "?" "h")) (subshell-help)]
@@ -149,10 +149,14 @@
           ; I dunno
           [else (print "Nothing to do with that.")])
   
-        (loop (subshell-prompt))))))
+        (loop (subshell-prompt w))))))
 
-(define (subshell-prompt)
-  (subshell-parse (linenoise "marks] ")))
+(define (subshell-prompt win)
+  (subshell-parse
+    (linenoise
+      (format "marks [ ~a/~a ] "
+        (add1 (window-position win))
+        (window-count win)))))
   
 ;;
 ;; string-input is a subshell command such as "a 123 here are tags".
