@@ -117,7 +117,7 @@
     [(equal? color "yellow")
       (set-text '(fg-yellow) s)]
     [(equal? color "white")
-      (set-text '(fg-blue) s)]
+      (set-text '(fg-white) s)]
     [(equal? color "cyan")
       (set-text '(fg-cyan) s)]
     [(equal? color "magenta")
