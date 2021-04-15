@@ -23,10 +23,7 @@
     "google-chrome-stable"
     "midori"
     "ditto"
-    "surf"
-    "elinks"
-    "links"
-    "lynx"))
+    "surf")) ; TODO Resolve stdin conflicts and add suport for terminal browsers such as lynx.
 
 (define possible-windows-browsers '())
 
