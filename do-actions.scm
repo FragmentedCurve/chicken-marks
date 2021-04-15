@@ -57,7 +57,7 @@
   (bookie-delete (bookie-server) [config-key (config-default-key)] url ""))
 
 (define (do-kill)
-  (bookie-kill (bookie-server) [config-key (config-default-key)]))
+  (bookie-kill (bookie-server) [config-key (config-default-key)] "" ""))
 
 (define (do-import filename)
   (error-msg "Importing is not implemented yet."))

@@ -98,8 +98,7 @@
   (do-import (car args)))
   
 (define (main-kill cmd . args)
-  ; TODO implement
-  (print cmd args))
+  (do-kill))
 
 (define (main-nothing cmd . args)
   (print "Nothing to do."))
