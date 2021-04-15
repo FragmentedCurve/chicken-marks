@@ -138,17 +138,18 @@
           ; Display current window
           [(in (subshell-cmd-action cmd) '("print" "p")) (print-entry-window w)]
 
-          ; Open the URLs in the browser
-          [(in (subshell-cmd-action cmd) '("open" "o"))
-            (for-each (lambda (i)
-                (when (valid-window-index? w i)
-                  (let ([e (window-ref w i)])
-                    (open-browser (entry-url e)))))
-              (subshell-cmd-nums cmd))]
+          ; If the command action has numbers in it, open the URLs.
+          ; Else, I dunno.
+          [else
+            (let ([nums (all-to-number (string->list (subshell-cmd-action cmd)))])
+              (if (not-null? nums)
+                (for-each (lambda (i)
+                    (when (valid-window-index? w i)
+                      (let ([e (window-ref w i)])
+                        (open-browser (entry-url e)))))
+                  nums)
+                (print "Nothing to do with that.")))])
           
-          ; I dunno
-          [else (print "Nothing to do with that.")])
-  
         (loop (subshell-prompt w))))))
 
 (define (subshell-prompt win)
@@ -187,12 +188,13 @@
   (print "===============================================\n"
          "add    (a)   [0-9]... [tags]   Replace tags\n"
          "append (aa)  [0-9]... [tags]   Append tags\n"
-         "delete (d)   [0-9]...          Delete entries\n"
-         "open   (o)   [0-9]...          Open entries\n\n"
+         "delete (d)   [0-9]...          Delete entries\n\n"
          
-         "next   (])\n"
-         "prev   ([)\n"
-         "print  (p)\n\n"
+         "next   (])                     Next window\n"
+         "prev   ([)                     Previous window\n"
+         "print  (p)                     Print window\n\n"
+
+         "[0-9]...                       Open URLs\n\n"
          
          "quit   (q)                     Quit\n"
          "help   (?)                     Display this\n"
