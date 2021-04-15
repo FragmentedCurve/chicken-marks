@@ -8,6 +8,7 @@
 (import (chicken plist))
 (import (chicken string))
 (import (chicken io))
+(import (chicken port))
 
 (define (do-list-all)
   (print-entry-list (bookie-parse
@@ -18,16 +19,20 @@
     (bookie-search (bookie-server) [config-key (config-default-key)] "" ""))))
 
 (define (do-search url tag-list)
-  (let ((entries (bookie-parse
-      (bookie-search (bookie-server) [config-key (config-default-key)]
-        url
-        (tagline->string tag-list)))))
+  (let ([entries (bookie-parse
+                   (bookie-search (bookie-server) [config-key (config-default-key)]
+                     url
+                     (tagline->string tag-list)))])
 
-    (if (= 1 (length entries))
-      (begin
-        (print-entry (car entries))
-        (open-browser (entry-url (car entries))))
-      (marks-subshell entries))))
+    ;; If the output is going to a tty, use the marks subshell.
+    ;; If not, just dump the results.
+    (if (terminal-port? (current-output-port))
+      (if (= 1 (length entries))
+        (begin
+          (print-entry (car entries))
+          (open-browser (entry-url (car entries))))
+        (marks-subshell entries))
+      (print-entry-list entries))))
   
 (define (do-tag-search tag-list)
   (do-search "" tag-list))
