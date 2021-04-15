@@ -67,12 +67,15 @@
   (error-msg "Importing is not implemented yet."))
 
 (define (do-ingest filename)
-  (let ([file (open-input-file filename)])
-    ; TODO Handle errors when opening the file fails
+  ; TODO Handle errors when opening the file fails
+  (let ([file (call-with-input-file
+                filename
+                (lambda (port)
+                  (read-string #f port)))])
     (for-each (lambda (e)
         (print "Ingesting -- " (entry-url e))
         (do-add (entry-url e) (entry-tagline e)))
-      (bookie-parse (string-intersperse (read-lines file) "\n")))))
+      (bookie-parse file))))
 
 (define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix "") (do-color #f))
   (display prefix)
