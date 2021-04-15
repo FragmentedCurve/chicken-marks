@@ -64,7 +64,8 @@
     (lambda (e i)
       (print-entry e
         suffix: "\n"
-        line-prefix: (sprintf "~A) " i)))))
+        line-prefix: (sprintf "~A) " i)
+        do-color: #t))))
 
 ;;
 ;; Ignore all non-numeric chars & convert chars to numbers.

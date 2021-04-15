@@ -99,10 +99,8 @@
 (define (init-config)
   ; Fill plist  with default setting values
   (config 'server "https://bookie.pacopascal.com")
-  (config 'tagline-background "0")
-  (config 'urlline-background "0")
-  (config 'tagline-foreground "0")
-  (config 'urlline-foreground "0")
+  (config 'tagline-fg-color #f)
+  (config 'urlline-fg-color #f)
   
   (let*
     ((config-dir (marks-config-directory))

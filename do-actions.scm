@@ -5,6 +5,8 @@
 (declare (uses subshell))
 (declare (uses browser))
 
+(import ansi-escape-sequences)
+
 (import (chicken plist))
 (import (chicken string))
 (import (chicken io))
@@ -72,8 +74,18 @@
 
 (define (print-entry e #!key (prefix "") (line-prefix "") (suffix "") (line-suffix ""))
   (display prefix)
-  (print line-prefix "TAGS : " (tagline->string (entry-tagline e)) line-suffix)
-  (print line-prefix "URL  : " (entry-url e) line-suffix)
+  (print
+    line-prefix
+    (colorize
+      (conc "TAGS : " (tagline->string (entry-tagline e)))
+      (config 'tagline-fg-color))
+    line-suffix)
+  (print
+    line-prefix
+    (colorize
+      (conc "URL  : " (entry-url e))
+      (config 'urlline-fg-color))
+    line-suffix)
   (display suffix))
   
 (define (print-entry-list data)
@@ -81,3 +93,23 @@
     (when (not (null? walk))
       (print-entry (car walk) prefix: sep)
       (loop (cdr walk) "\n"))))
+
+(define (colorize s color)
+  (cond
+    [(equal? color "green")
+      (set-text '(fg-green) s)]
+    [(equal? color "red")
+      (set-text '(fg-red) s)]
+    [(equal? color "blue")
+      (set-text '(fg-blue) s)]
+    [(equal? color "yellow")
+      (set-text '(fg-yellow) s)]
+    [(equal? color "white")
+      (set-text '(fg-blue) s)]
+    [(equal? color "cyan")
+      (set-text '(fg-cyan) s)]
+    [(equal? color "magenta")
+      (set-text '(fg-magenta) s)]
+    [(equal? color "black")
+      (set-text '(fg-black) s)]
+    [else s]))
