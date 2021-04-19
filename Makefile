@@ -1,50 +1,48 @@
-CHICKEN_CSC ?= chicken-csc
-EGGS := openssl,http-client
-CSC_FLAGS := -static -O3 -link $(EGGS)
-#SSL_FLAGS :=  -L "$(shell pkg-config --libs openssl)"
-SSL_FLAGS := -L "-lssl -lcrypto"
-CSC_STATIC_FLAGS := -L "-static"
+CHICKEN_CSC      := csc
+EGGS             := openssl http-client
+_EGGS            := $(foreach egg, $(EGGS), $(eval _EGGS=$(egg),$(_EGGS)))$(_EGGS:,=)
+CSC_FLAGS        := -static -O3 -link $(_EGGS)
+SSL_FLAGS        := -L "-lssl -lcrypto"
+STRIP            := strip -s
 
 SOURCES := main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm browser.scm
 OBJECTS := $(SOURCES:.scm=.o)
 
 MARKSEXE := marks
-MARKS_STATIC := marks.static
-MARKS_DOCKER := marks.docker
 
-DOCKER := docker
-STRIP := strip -s
+.PHONY: help
 
-.PHONY: static docker help
+ifndef PLATFORM
+all: help
+else
+all: $(MARKSEXE)
+endif
 
-all: dynamic
+ifeq ($(PLATFORM),linux)
+CHICKEN_CSC := chicken-csc
+SSL_FLAGS   :=  -L "$(shell pkg-config --libs openssl)"
+endif
 
-dynamic: $(MARKSEXE)
-static: $(MARKS_STATIC)
-docker: $(MARKS_DOCKER)
+ifeq ($(PLATFORM),macos)
+CHICKEN_CSC := csc
+SSL_FLAGS := -L "$(shell brew --prefix openssl)/lib -lssl -lcrypto"
+endif
 
 %.o: %.scm
 	$(CHICKEN_CSC) $(CSC_FLAGS) -c $(basename $@).scm
 
 $(MARKSEXE): $(OBJECTS)
 	$(CHICKEN_CSC) $(CSC_FLAGS) $(SSL_FLAGS) $(OBJECTS) -o $@
-
-$(MARKS_STATIC): $(OBJECTS)
-	$(CHICKEN_CSC) $(CSC_FLAGS) $(CSC_STATIC_FLAGS) $(SSL_FLAGS) $(OBJECTS) -o $@
-
-$(MARKS_DOCKER): $(SOURCES)
-	$(DOCKER) build -t $(MARKS_DOCKER) .
-	$(DOCKER) create --name $(MARKS_DOCKER) $(MARKS_DOCKER)
-	$(DOCKER) cp $(MARKS_DOCKER):/marks/$(MARKS_STATIC) ./$(MARKS_DOCKER)
-	$(DOCKER) rm $(MARKS_DOCKER)
-	$(STRIP) $(MARKS_DOCKER)
+	$(STRIP) $@
 
 help:
-	@echo "Targets:"
-	@echo "  dynamic       The default target which builds a dynamically linked executable."
-	@echo "  static        Build a statically linked executable. (Might not work on some distros.)"
-	@echo "  docker        Use Docker to build a statically linked executable instead of the host OS."
-	@echo "  help          Print this."
+	@echo "Platforms:"
+	@echo "  linux"
+	@echo "  macos"
+	@echo
+	@echo "Examples:"
+	@echo "  make PLATFORM=linux"
+	@echo "  make PLATFORM=macos"
 
 clean:
 	$(RM) $(OBJECTS:.o=.link) $(OBJECTS) $(MARKSEXE) $(MARKS_STATIC) $(MARKS_DOCKER)
