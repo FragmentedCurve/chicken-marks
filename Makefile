@@ -3,7 +3,6 @@ EGGS             := openssl http-client
 _EGGS            := $(foreach egg, $(EGGS), $(eval _EGGS=$(egg),$(_EGGS)))$(_EGGS:,=)
 CSC_FLAGS        := -static -O3 -link $(_EGGS)
 SSL_FLAGS        := -L "-lssl -lcrypto"
-STRIP            := strip -s
 
 SOURCES := main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm browser.scm
 OBJECTS := $(SOURCES:.scm=.o)
@@ -33,7 +32,6 @@ endif
 
 $(MARKSEXE): $(OBJECTS)
 	$(CHICKEN_CSC) $(CSC_FLAGS) $(SSL_FLAGS) $(OBJECTS) -o $@
-	$(STRIP) $@
 
 help:
 	@echo "Platforms:"
