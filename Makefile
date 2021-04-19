@@ -25,7 +25,7 @@ endif
 
 ifeq ($(PLATFORM),macos)
 CHICKEN_CSC := csc
-SSL_FLAGS := -L "$(shell brew --prefix openssl)/lib -lssl -lcrypto"
+SSL_FLAGS := -L "-L$(shell brew --prefix openssl)/lib -lssl -lcrypto"
 endif
 
 %.o: %.scm
