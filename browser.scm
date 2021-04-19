@@ -70,7 +70,7 @@
 (define (open-browser url)
   (let ([platform (software-type)] [version (software-version)])
     (cond
-      [(eq? 'unix platform)
+      [(and (eq? 'unix platform) (eq? 'linux version))
         (when (not (open-unix-browser url))
           (error-msg "Unable to find a browser."))]
       [else (error-msg "Your platform isn't supported for opening a browser.")])))
