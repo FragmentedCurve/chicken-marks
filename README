@@ -16,23 +16,24 @@ Bulk tagline replacement, tag appending, and bookmark deleting.
 Import browser backups.
 Integration with default web browser & your operating system's clipboard.
 
-Runtime Requirements
+Requirements
 ==================
 
+  - CHICKEN 5
   - OpenSSL
-
-Build Requirements
-==================
-
-  - chicken 5
-  - http-client
-  - srfi-1
-  - linenoise
+  - CHICKEN EGGS:
+    - http-client
+    - srfi-1
+    - linenoise
+	- ansi-escape-sequences
 
 Building
 ========
 
-$ git clone https://github.com/FragmentedCurve/chicken-marks.git
-$ cd chicken-marks
-$ chicken-install http-client srfi-1 linenoise
-$ make
+On Linux:
+
+$ make PLATFORM=linux
+
+On macos
+
+$ make PLATFORM=macos
