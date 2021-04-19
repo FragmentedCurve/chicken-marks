@@ -20,6 +20,10 @@ ifeq ($(PLATFORM),linux)
 CHICKEN_CSC := chicken-csc
 endif
 
+ifeq ($(PLATFORM),freebsd)
+CHICKEN_CSC := csc5
+endif
+
 ifeq ($(PLATFORM),macos)
 CHICKEN_CSC := csc
 SSL_FLAGS := -L "-L$(shell brew --prefix openssl)/lib -lssl -lcrypto"
@@ -34,6 +38,7 @@ $(MARKSEXE): $(OBJECTS)
 help:
 	@echo "Platforms:"
 	@echo "  linux"
+	@echo "  freebsd"
 	@echo "  macos"
 	@echo
 	@echo "Examples:"
