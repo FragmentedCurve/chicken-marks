@@ -1,7 +1,6 @@
 CHICKEN_CSC      := csc
 EGGS             := openssl http-client
-_EGGS            := $(foreach egg, $(EGGS), $(eval _EGGS=$(egg),$(_EGGS)))$(_EGGS:,=)
-CSC_FLAGS        := -static -O3 -link $(_EGGS)
+CSC_FLAGS        := -static -O3 $(foreach egg,$(EGGS),-link $(egg))
 SSL_FLAGS        := -L "-lssl -lcrypto"
 
 SOURCES := main.scm do-actions.scm bookie.scm config.scm subshell.scm key.scm utils.scm browser.scm
@@ -19,7 +18,6 @@ endif
 
 ifeq ($(PLATFORM),linux)
 CHICKEN_CSC := chicken-csc
-SSL_FLAGS   :=  -L "$(shell pkg-config --libs openssl)"
 endif
 
 ifeq ($(PLATFORM),macos)
@@ -43,4 +41,4 @@ help:
 	@echo "  make PLATFORM=macos"
 
 clean:
-	$(RM) $(OBJECTS:.o=.link) $(OBJECTS) $(MARKSEXE) $(MARKS_STATIC) $(MARKS_DOCKER)
+	$(RM) $(OBJECTS:.o=.link) $(OBJECTS) $(MARKSEXE)
