@@ -24,8 +24,8 @@
          "  key                               Sub menu for managing keys\n"
          "  raw                               Output raw database dump\n"
          "  ingest         [filename]         Import a bookie backup file\n"
-         "  import         [filename]         Import Netscape bookmark file\n"
-         "  kill kill kill                    Wipe out all your data from the cloud\n"
+         ;"  import         [filename]         Import Netscape bookmark file\n"
+         ;"  kill kill kill                    Wipe out all your data from the cloud\n"
          "  help     (?)                      Display this"))
 
 (define (main-add cmd . args)
@@ -123,8 +123,8 @@
     ([in (car args) '("key")] main-key)
     ([in (car args) '("raw")] main-raw)
     ([in (car args) '("ingest")] main-ingest)
-    ([in (car args) '("import")] main-import)
-    ([in (car args) '("kill")] main-kill)
+    ;([in (car args) '("import")] main-import)
+    ;([in (car args) '("kill")] main-kill)
     ([in (car args) '("help" "?")] main-help)
     ([in (string->symbol (car args)) (config-key-labels)] main-key-switch)
     (else main-nothing)))
