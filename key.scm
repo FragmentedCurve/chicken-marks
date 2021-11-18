@@ -1,6 +1,4 @@
 (declare (unit key))
-(declare (uses config))
-(declare (uses bookie))
 
 ;;
 ;; Help key me!

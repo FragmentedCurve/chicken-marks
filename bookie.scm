@@ -6,10 +6,11 @@
 
 (declare (unit bookie))
 
-(import http-client)
-(import (chicken random))
-(import (chicken io))
-(import (chicken string))
+(import
+  http-client
+  (chicken random)
+  (chicken io)
+  (chicken string))
 
 (define bookie-alphabet (string->list "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
 (define bookie-key-length 69)
@@ -25,12 +26,12 @@
     `((key . ,key) (url . ,url) (tag . ,tagline))
     read-string))
   
-(define (bookie-delete server key url tagline)
+(define (bookie-delete server key url)
   (with-input-from-request (string-append server "/delete")
     `((key . ,key) (url . ,url))
     read-string))
 
-(define (bookie-kill server key url tagline)
+(define (bookie-kill server key)
   (with-input-from-request (string-append server "/kill")
     `((key . ,key)) read-string))
 

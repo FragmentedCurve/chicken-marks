@@ -1,8 +1,9 @@
 (declare (unit utils))
 
-(import (chicken string))
-(import (chicken platform))
-(import (chicken process))
+(import
+  (chicken string)
+  (chicken platform)
+  (chicken process))
 
 ;;
 ;; Return true if the needle is found in the list (haystack).

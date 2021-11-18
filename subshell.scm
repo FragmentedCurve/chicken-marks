@@ -1,13 +1,11 @@
 (declare (unit subshell))
-(declare (uses bookie))
-(declare (uses utils))
-(declare (uses browser))
 
-(import srfi-1)
-(import linenoise)
-(import (chicken string))
-(import (chicken format))
-(import (chicken sort))
+(import
+  srfi-1
+  linenoise
+  (chicken string)
+  (chicken format)
+  (chicken sort))
 
 ;;
 ;; Returns a vector of the form: #(entry-list position window-size)

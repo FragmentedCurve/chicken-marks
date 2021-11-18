@@ -3,18 +3,17 @@
 ;;;
 
 (declare (unit config))
-(declare (uses bookie))
-(declare (uses utils))
 
-(import (chicken io))
-(import (chicken file))
-(import (chicken pathname))
-(import (chicken process-context))
-(import (chicken plist))
-(import (chicken string))
-(import (chicken platform))
-(import (chicken format))
-(import (chicken sort))
+(import
+  (chicken io)
+  (chicken file)
+  (chicken pathname)
+  (chicken process-context)
+  (chicken plist)
+  (chicken string)
+  (chicken platform)
+  (chicken format)
+  (chicken sort))
 
 (define (marks-config-directory) (make-absolute-pathname (system-config-directory) "marks"))
 

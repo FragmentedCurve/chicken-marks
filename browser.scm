@@ -1,11 +1,12 @@
 (declare (unit browser))
 
-(import (chicken string))
-(import (chicken file))
-(import (chicken pathname))
-(import (chicken platform))
-(import (chicken process))
-(import (chicken process-context))
+(import
+  (chicken string)
+  (chicken file)
+  (chicken pathname)
+  (chicken platform)
+  (chicken process)
+  (chicken process-context))
 
 ;;
 ;; A list of possible browsers for marks to use.

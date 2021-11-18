@@ -1,16 +1,11 @@
 (declare (unit do-actions))
 
-(declare (uses bookie))
-(declare (uses config))
-(declare (uses subshell))
-(declare (uses browser))
-
-(import ansi-escape-sequences)
-
-(import (chicken plist))
-(import (chicken string))
-(import (chicken io))
-(import (chicken port))
+(import
+  ansi-escape-sequences
+  (chicken plist)
+  (chicken string)
+  (chicken io)
+  (chicken port))
 
 (define (do-list-all)
   (print-entry-list
@@ -58,10 +53,10 @@
         (do-add url (append (entry-tagline (car entry)) tagline))))))
   
 (define (do-delete url)
-  (bookie-delete (bookie-server) [config-key (config-default-key)] url ""))
+  (bookie-delete (bookie-server) [config-key (config-default-key)] url))
 
 (define (do-kill)
-  (bookie-kill (bookie-server) [config-key (config-default-key)] "" ""))
+  (bookie-kill (bookie-server) [config-key (config-default-key)]))
 
 (define (do-import filename)
   (error-msg "Importing is not implemented yet."))
