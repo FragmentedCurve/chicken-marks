@@ -6,11 +6,11 @@
 
 (declare (unit bookie))
 
-(import
-  http-client
-  (chicken random)
-  (chicken io)
-  (chicken string))
+(import openssl
+	http-client
+	(chicken random)
+	(chicken io)
+	(chicken string))
 
 (define bookie-alphabet (string->list "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
 (define bookie-key-length 69)
